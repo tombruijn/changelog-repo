@@ -52,6 +52,6 @@ jobs:
 
       - name: Make Pull Request
         run: |
-          gh pr create --fill
+          gh pr create --fill --reviewer tombruijn
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
