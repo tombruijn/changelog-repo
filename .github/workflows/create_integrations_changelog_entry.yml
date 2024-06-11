@@ -27,8 +27,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@users.noreply.github.com"
+          git config --global user.name "Github Actions Bot"
+          git config --global user.email "<>"
 
       - name: Create changelog entry file
         run: |
