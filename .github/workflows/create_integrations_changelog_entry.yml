@@ -15,6 +15,9 @@ on:
       changelog:
         description: "Changelog contents"
         required: true
+      assignee:
+        description: "The assignee of the PR to be created"
+        required: true
 
 permissions:
   contents: write
@@ -70,6 +73,6 @@ jobs:
 
       - name: Make Pull Request
         run: |
-          gh pr create --fill --label "writing" --assignee "${{ inputs.assignee }}"
+          gh pr create --fill --label "writing" --assignee "${{ inputs.assignee }}" --reviewer "${{ inputs.assignee }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
