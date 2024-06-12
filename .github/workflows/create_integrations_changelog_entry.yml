@@ -3,8 +3,11 @@ name: "Create package changelog entry"
 on:
   workflow_dispatch:
     inputs:
-      package:
-        description: "Name of the package"
+      title:
+        description: "Title of the changelog entry"
+        required: true
+      category:
+        description: "Category of the changelog entry"
         required: true
       version:
         description: "Version of the package"
@@ -27,34 +30,46 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.name "Github Actions Bot"
-          git config --global user.email "<>"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Create changelog entry file
+      - name: Create Git branch
         run: |
-          export NORMALIZED_PACKAGE_NAME=$(echo "$PACKAGE_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-          BRANCH_NAME="$NORMALIZED_PACKAGE_NAME-$PACKAGE_VERSION"
+          # Normalize Git branch name so it doesn't contain spaces or capital letters
+          export NORMALIZED_PACKAGE_CATEGORY=$(echo "$PACKAGE_CATEGORY" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+          echo "NORMALIZED_PACKAGE_CATEGORY=$NORMALIZED_PACKAGE_CATEGORY" >> $GITHUB_ENV
+          BRANCH_NAME="$NORMALIZED_PACKAGE_CATEGORY-$PACKAGE_VERSION"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
           git checkout -b "$BRANCH_NAME"
-          cat changelog-template.txt | envsubst > "changelog/$NORMALIZED_PACKAGE_NAME-$PACKAGE_VERSION.mdx"
-
         env:
-          PACKAGE_NAME: ${{ inputs.package }}
+          PACKAGE_CATEGORY: ${{ inputs.category }}
           PACKAGE_VERSION: ${{ inputs.version }}
-          PACKAGE_CHANGELOG: ${{ inputs.changelog }}
+
+      - name: Create changelog entry file
+        run: |
+          # Create changelog entry directory
+          changelog_dir="posts/changelog/$(date +%Y)"
+          mkdir -p "$changelog_dir"
+          # Create changelog file based on template
+          cat support/package-changelog-template.mdx | envsubst > "$changelog_dir/$(date +%Y-%m-%d)-${{ env.NORMALIZED_PACKAGE_CATEGORY }}-$PACKAGE_VERSION.mdx"
+        env:
+          CHANGELOG_TITLE: ${{ inputs.title }}
+          CHANGELOG_CATEGORY: ${{ inputs.category }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          CHANGELOG_TEXT: ${{ inputs.changelog }}
 
       - name: Commit and push changelog entry
         run: |
           git add .
           git commit \
-            -m 'Add changelog entry for ${{ github.event.inputs.package }} ${{ github.event.inputs.version }}' \
-            -m 'Contents supplied by GitHub Action API call.' \
-            -m 'Action triggered by ${{ github.actor }}.'
+            -m 'Add changelog entry for ${{ github.event.inputs.category }} ${{ github.event.inputs.version }}' \
+            -m 'Contents supplied by the GitHub Action API call.' \
+            -m 'Release published by @${{ inputs.assignee }}.'
           git push origin "${{ env.BRANCH_NAME }}"
 
       - name: Make Pull Request
         run: |
-          gh pr create --fill --reviewer ${{ github.actor }}
+          gh pr create --fill --label "writing" --assignee "${{ inputs.assignee }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
