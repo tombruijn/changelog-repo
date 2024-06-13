@@ -39,7 +39,7 @@ jobs:
       - name: Create Git branch
         run: |
           # Normalize Git branch name so it doesn't contain spaces or capital letters
-          export NORMALIZED_PACKAGE_CATEGORY=$(echo "$PACKAGE_CATEGORY" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+          export NORMALIZED_PACKAGE_CATEGORY=$(echo "$PACKAGE_CATEGORY" | tr '[:upper:]' '[:lower:]' | tr ' @/' '-')
           echo "NORMALIZED_PACKAGE_CATEGORY=$NORMALIZED_PACKAGE_CATEGORY" >> $GITHUB_ENV
           BRANCH_NAME="$NORMALIZED_PACKAGE_CATEGORY-$PACKAGE_VERSION"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
