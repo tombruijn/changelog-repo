@@ -41,7 +41,9 @@ jobs:
           # Normalize Git branch name so it doesn't contain spaces or capital letters
           export NORMALIZED_PACKAGE_CATEGORY=$(echo "$PACKAGE_CATEGORY" | tr '[:upper:]' '[:lower:]' | tr ' @/' '-')
           echo "NORMALIZED_PACKAGE_CATEGORY=$NORMALIZED_PACKAGE_CATEGORY" >> $GITHUB_ENV
-          BRANCH_NAME="$NORMALIZED_PACKAGE_CATEGORY-$PACKAGE_VERSION"
+          export NORMALIZED_PACKAGE_VERSION=$(echo "$PACKAGE_VERSION" | tr '[:upper:]' '[:lower:]' | tr ' @/' '-')
+          echo "NORMALIZED_PACKAGE_VERSION=$NORMALIZED_PACKAGE_VERSION" >> $GITHUB_ENV
+          BRANCH_NAME="$NORMALIZED_PACKAGE_CATEGORY-$NORMALIZED_PACKAGE_VERSION"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
           git checkout -b "$BRANCH_NAME"
@@ -55,7 +57,7 @@ jobs:
           changelog_dir="posts/changelog/$(date +%Y)"
           mkdir -p "$changelog_dir"
           # Create changelog file based on template
-          cat support/package-changelog-template.mdx | envsubst > "$changelog_dir/$(date +%Y-%m-%d)-${{ env.NORMALIZED_PACKAGE_CATEGORY }}-$PACKAGE_VERSION.mdx"
+          cat support/package-changelog-template.mdx | envsubst > "$changelog_dir/$(date +%Y-%m-%d)-${{ env.NORMALIZED_PACKAGE_CATEGORY }}-${{ env.NORMALIZED_PACKAGE_VERSION }}.mdx"
         env:
           CHANGELOG_TITLE: ${{ inputs.title }}
           CHANGELOG_CATEGORY: ${{ inputs.category }}
