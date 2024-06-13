@@ -70,7 +70,6 @@ jobs:
           git commit \
             -m 'Add changelog entry for ${{ github.event.inputs.category }} ${{ github.event.inputs.version }}' \
             -m 'Contents supplied by the GitHub Action API call.' \
-            -m 'Co-authored-by: ${{ inputs.assignee }} <${{ inputs.assignee }}@users.noreply.github.com>'
           git push origin "${{ env.BRANCH_NAME }}"
 
       - name: Make Pull Request
